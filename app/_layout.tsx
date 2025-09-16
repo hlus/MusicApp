@@ -10,6 +10,8 @@ import TrackPlayer from "react-native-track-player";
 import { queryClient } from "@/api/config/queryClient";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
+TrackPlayer.registerPlaybackService(() => require("../service.js"));
+
 export const unstable_settings = {
   anchor: "(tabs)",
 };

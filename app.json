@@ -13,8 +13,7 @@
       "backgroundModes": [
         "audio",
         "audio"
-      ],
-      "bundleIdentifier": "com.bogdankushcomputools.MusicApp"
+      ]
     },
     "android": {
       "adaptiveIcon": {
