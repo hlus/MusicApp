@@ -24,7 +24,6 @@ export const AudioPlayer: React.FC<SimplePlayerProps> = ({ previewUrl, trackTitl
   const progress = useProgress();
   const playbackState = usePlaybackState();
 
-  const isPlaying = useSharedValue(false);
   const duration = useSharedValue(0);
 
   useEffect(() => {
@@ -32,10 +31,6 @@ export const AudioPlayer: React.FC<SimplePlayerProps> = ({ previewUrl, trackTitl
       TrackPlayer.reset();
     };
   }, []);
-
-  useEffect(() => {
-    isPlaying.value = playbackState.state === State.Playing;
-  }, [playbackState.state]);
 
   useEffect(() => {
     if (progress.duration > 0) {
@@ -47,7 +42,7 @@ export const AudioPlayer: React.FC<SimplePlayerProps> = ({ previewUrl, trackTitl
     if (!previewUrl) return;
 
     try {
-      if (isPlaying.value) {
+      if (playbackState.state === State.Playing) {
         return await TrackPlayer.pause();
       }
 
@@ -72,7 +67,9 @@ export const AudioPlayer: React.FC<SimplePlayerProps> = ({ previewUrl, trackTitl
     const progressPercentage = duration.value > 0 ? (progress.position / duration.value) * 100 : 0;
     return { width: `${progressPercentage}%` };
   });
-  const playButtonStyle = useAnimatedStyle(() => ({ transform: [{ scale: withTiming(isPlaying.value ? 0.95 : 1, { duration: 150 }) }] }));
+  const playButtonStyle = useAnimatedStyle(() => ({ 
+    transform: [{ scale: withTiming(playbackState.state === State.Playing ? 0.95 : 1, { duration: 100 }) }] 
+  }));
 
   if (!previewUrl) {
     return (
