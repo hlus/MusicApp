@@ -22,7 +22,7 @@ export default function TabLayout() {
         options={{ title: "Playlist", tabBarIcon: ({ color }) => <IconSymbol size={28} name="music-note" color={color} /> }}
       />
       <Tabs.Screen
-        name="explore"
+        name="favorites"
         options={{ title: "Favorites", tabBarIcon: ({ color }) => <IconSymbol size={28} name="favorite" color={color} /> }}
       />
     </Tabs>

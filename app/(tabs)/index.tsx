@@ -1,6 +1,6 @@
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { ActivityIndicator, FlatList, ListRenderItemInfo, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -8,11 +8,25 @@ import { DeezerTrack } from "@/api/deezer/dto/track.dto";
 import { useArtistSearch } from "@/api/deezer/useDeezer.hook";
 import { ThemedText } from "@/components/themed-text";
 import { TrackCard } from "@/components/TrackCard";
+import { useFavorites } from "@/services/favorites/use-favorites.hook";
 
 const PlaylistScreen: React.FC = () => {
+  const [favoritesTrackIds, setFavoritesTrackIds] = useState(new Set<number>());
+  const { getFavorites, addToFavorites, deleteFromFavorites } = useFavorites();
   const insets = useSafeAreaInsets();
   const { isPending, error, data } = useArtistSearch("System of a Down", 25);
   const [isScrolled, setIsScrolled] = useState(false);
+
+  const updateFavoritesTrackIds = useCallback(async () => {
+    const favorites = await getFavorites();
+    setFavoritesTrackIds(new Set(favorites.map((favorite) => favorite.id)));
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      updateFavoritesTrackIds();
+    }, [updateFavoritesTrackIds])
+  );
 
   if (isPending) {
     return (
@@ -43,7 +57,19 @@ const PlaylistScreen: React.FC = () => {
     });
   };
 
-  const renderTrackRow = ({ item: track }: ListRenderItemInfo<DeezerTrack>) => <TrackCard track={track} onPress={handleTrackPress} />;
+  const handleFavoriteToggle = async (track: DeezerTrack, isFavorite: boolean) => {
+    if (isFavorite) {
+      await addToFavorites(track);
+    } else {
+      await deleteFromFavorites(track.id);
+    }
+
+    updateFavoritesTrackIds();
+  };
+
+  const renderTrackRow = ({ item: track }: ListRenderItemInfo<DeezerTrack>) => (
+    <TrackCard track={track} isFavorite={favoritesTrackIds.has(track.id)} onPress={handleTrackPress} onFavoriteToggle={handleFavoriteToggle} />
+  );
 
   const keyExtractor = (item: DeezerTrack) => item.id.toString();
 
@@ -61,6 +87,7 @@ const PlaylistScreen: React.FC = () => {
       <StatusBar hidden={isScrolled} />
       <FlatList
         style={[styles.container, { paddingTop: insets.top }]}
+        extraData={favoritesTrackIds}
         data={data.data}
         renderItem={renderTrackRow}
         keyExtractor={keyExtractor}
