@@ -43,9 +43,7 @@ const PlaylistScreen: React.FC = () => {
     });
   };
 
-  const renderTrackRow = ({ item: track }: ListRenderItemInfo<DeezerTrack>) => (
-    <TrackCard track={track} onPress={handleTrackPress} showFavoriteButton={true} />
-  );
+  const renderTrackRow = ({ item: track }: ListRenderItemInfo<DeezerTrack>) => <TrackCard track={track} onPress={handleTrackPress} />;
 
   const keyExtractor = (item: DeezerTrack) => item.id.toString();
 

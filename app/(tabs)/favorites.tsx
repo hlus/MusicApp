@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { DeezerTrack } from "@/api/deezer/dto/track.dto";
 import { useArtistSearch } from "@/api/deezer/useDeezer.hook";
-import { TrackCard } from "@/components/TrackCard";
+import { TrackFavoriteCard } from "@/components/TrackFavoriteCard";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -45,9 +45,7 @@ const FavoritesScreen = () => {
     });
   };
 
-  const renderTrackRow = ({ item: track }: ListRenderItemInfo<DeezerTrack>) => (
-    <TrackCard track={track} onPress={handleTrackPress} />
-  );
+  const renderTrackRow = ({ item: track }: ListRenderItemInfo<DeezerTrack>) => <TrackFavoriteCard track={track} />;
 
   const keyExtractor = (item: DeezerTrack) => item.id.toString();
 
@@ -64,17 +62,11 @@ const FavoritesScreen = () => {
     <ThemedView style={styles.emptyContainer}>
       <IconSymbol name="favorite" size={64} color="#ccc" />
       <ThemedText style={styles.emptyTitle}>No Favorites Yet</ThemedText>
-      <ThemedText style={styles.emptySubtitle}>
-        Start adding tracks to your favorites by tapping the heart icon on any track
-      </ThemedText>
+      <ThemedText style={styles.emptySubtitle}>Start adding tracks to your favorites by tapping the heart icon on any track</ThemedText>
     </ThemedView>
   );
 
-  const ListHeaderComponent = () => (
-    <ThemedText style={styles.title}>
-      My Favorites ({favorites.length})
-    </ThemedText>
-  );
+  const ListHeaderComponent = () => <ThemedText style={styles.title}>My Favorites ({favorites.length})</ThemedText>;
 
   return (
     <>
