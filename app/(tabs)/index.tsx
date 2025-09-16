@@ -1,4 +1,6 @@
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { StatusBar } from "expo-status-bar";
+import { useState } from "react";
+import { ActivityIndicator, FlatList, ListRenderItemInfo, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { DeezerTrack } from "@/api/deezer/dto/track.dto";
@@ -9,6 +11,7 @@ import { TrackCard } from "@/components/TrackCard";
 const PlaylistScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const { isPending, error, data } = useArtistSearch("System of a Down", 25);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   if (isPending) {
     return (
@@ -27,13 +30,34 @@ const PlaylistScreen: React.FC = () => {
     );
   }
 
-  const renderTrackRow = (track: DeezerTrack) => <TrackCard key={track.id} track={track} />;
+  const ListHeaderComponent = () => <ThemedText style={styles.title}>System of a Down Tracks</ThemedText>;
+
+  const renderTrackRow = ({ item: track }: ListRenderItemInfo<DeezerTrack>) => <TrackCard track={track} />;
+
+  const keyExtractor = (item: DeezerTrack) => item.id.toString();
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const scrollY = event.nativeEvent.contentOffset.y;
+    const isUpdatedScrolled = scrollY >= insets.top / 2;
+
+    if (isScrolled !== isUpdatedScrolled) {
+      setIsScrolled(isUpdatedScrolled);
+    }
+  };
 
   return (
-    <ScrollView style={[styles.container, { paddingTop: insets.top }]}>
-      <ThemedText style={styles.title}>System of a Down Tracks</ThemedText>
-      {data.data.map(renderTrackRow)}
-    </ScrollView>
+    <>
+      <StatusBar hidden={isScrolled} />
+      <FlatList
+        style={[styles.container, { paddingTop: insets.top }]}
+        data={data.data}
+        renderItem={renderTrackRow}
+        keyExtractor={keyExtractor}
+        ListHeaderComponent={ListHeaderComponent}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+      />
+    </>
   );
 };
 
