@@ -9,7 +9,12 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "backgroundModes": [
+        "audio",
+        "audio"
+      ],
+      "bundleIdentifier": "com.bogdankushcomputools.MusicApp"
     },
     "android": {
       "adaptiveIcon": {
@@ -36,6 +41,14 @@
           "backgroundColor": "#ffffff",
           "dark": {
             "backgroundColor": "#000000"
+          }
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
           }
         }
       ]

@@ -2,6 +2,7 @@ import { useLocalSearchParams } from "expo-router";
 import { ActivityIndicator, Image, Linking, ScrollView, StyleSheet, View } from "react-native";
 
 import { useTrackById } from "@/api/deezer/useDeezer.hook";
+import { AudioPlayer } from "@/components/AudioPlayer";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 
@@ -51,6 +52,15 @@ const TrackModal = () => {
                 <ThemedText style={styles.albumName}>{trackDetails.album?.title}</ThemedText>
               </View>
             </View>
+
+            {trackDetails.preview && (
+              <AudioPlayer
+                previewUrl={trackDetails.preview}
+                trackTitle={trackDetails.title}
+                artistName={trackDetails.artist?.name || ""}
+                albumCover={trackDetails.album?.cover_big}
+              />
+            )}
 
             <View style={styles.section}>
               <ThemedText type="subtitle" style={styles.sectionTitle}>
