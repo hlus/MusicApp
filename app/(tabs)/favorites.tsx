@@ -1,22 +1,39 @@
-import { router } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { ActivityIndicator, FlatList, ListRenderItemInfo, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { DeezerTrack } from "@/api/deezer/dto/track.dto";
-import { useArtistSearch } from "@/api/deezer/useDeezer.hook";
 import { TrackFavoriteCard } from "@/components/TrackFavoriteCard";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { FavoriteTrack } from "@/db/favorite-tracks";
+import { useFavorites } from "@/services/favorites/use-favorites.hook";
 
 const FavoritesScreen = () => {
+  const { getFavorites, deleteFromFavorites, isLoading, error } = useFavorites();
   const insets = useSafeAreaInsets();
-  const { isPending, error, data } = useArtistSearch("System of a Down", 25);
+  const [favorites, setFavorites] = useState<FavoriteTrack[]>([]);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  if (isPending) {
+  const updateFavorites = useCallback(async () => {
+    const favorites = await getFavorites();
+    setFavorites(favorites);
+  }, []);
+
+  const handleUnfavorite = async (track: FavoriteTrack) => {
+    await deleteFromFavorites(track.id);
+    updateFavorites();
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      updateFavorites();
+    }, [updateFavorites])
+  );
+
+  if (isLoading) {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" />
@@ -28,26 +45,16 @@ const FavoritesScreen = () => {
   if (error) {
     return (
       <View style={styles.centerContainer}>
-        <ThemedText style={styles.errorText}>Error: {error.message}</ThemedText>
+        <ThemedText style={styles.errorText}>Error: {error}</ThemedText>
       </View>
     );
   }
 
-  const favorites = data?.data || [];
+  const renderTrackRow = ({ item: track }: ListRenderItemInfo<FavoriteTrack>) => (
+    <TrackFavoriteCard track={track} toggleUnfavorite={handleUnfavorite} />
+  );
 
-  const handleTrackPress = (trackId: number, trackName: string) => {
-    router.push({
-      pathname: "/track-modal",
-      params: {
-        trackId: trackId.toString(),
-        trackName: trackName,
-      },
-    });
-  };
-
-  const renderTrackRow = ({ item: track }: ListRenderItemInfo<DeezerTrack>) => <TrackFavoriteCard track={track} />;
-
-  const keyExtractor = (item: DeezerTrack) => item.id.toString();
+  const keyExtractor = (item: FavoriteTrack) => item.id.toString();
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const scrollY = event.nativeEvent.contentOffset.y;

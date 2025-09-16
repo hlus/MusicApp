@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 
 import { DeezerTrack } from "@/api/deezer/dto/track.dto";
@@ -9,18 +9,22 @@ interface TrackCardProps {
   track: DeezerTrack;
   onPress?: (trackId: number, trackName: string) => void;
   isFavorite?: boolean;
-  onFavoriteToggle?: (track: DeezerTrack) => void;
+  onFavoriteToggle?: (track: DeezerTrack, isFavorite: boolean) => void;
 }
 
-export const TrackCard: React.FC<TrackCardProps> = ({ track, onPress, isFavorite = false, onFavoriteToggle }) => {
+export const TrackCard: FC<TrackCardProps> = ({ track, onPress, isFavorite = false, onFavoriteToggle }) => {
   const [localIsFavorite, setLocalIsFavorite] = useState(isFavorite);
+
+  useEffect(() => {
+    setLocalIsFavorite(isFavorite);
+  }, [isFavorite]);
 
   const handleFavoritePress = () => {
     if (onFavoriteToggle) {
-      onFavoriteToggle(track);
-    } else {
-      setLocalIsFavorite(!localIsFavorite);
+      onFavoriteToggle(track, !localIsFavorite);
     }
+
+    setLocalIsFavorite(!localIsFavorite);
   };
 
   const favoriteStatus = onFavoriteToggle ? isFavorite : localIsFavorite;

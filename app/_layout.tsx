@@ -8,6 +8,7 @@ import "react-native-reanimated";
 import TrackPlayer from "react-native-track-player";
 
 import { queryClient } from "@/api/config/queryClient";
+import { DBProvider } from "@/db/db-provider";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 TrackPlayer.registerPlaybackService(() => require("../service.js"));
@@ -31,21 +32,23 @@ const RootLayout: React.FC = () => {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="track-modal"
-            options={({ route }) => ({
-              presentation: "modal",
-              title: (route.params as { trackName?: string })?.trackName || "Track Details",
-            })}
-          />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </QueryClientProvider>
+    <DBProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="track-modal"
+              options={({ route }) => ({
+                presentation: "modal",
+                title: (route.params as { trackName?: string })?.trackName || "Track Details",
+              })}
+            />
+          </Stack>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </QueryClientProvider>
+    </DBProvider>
   );
 };
 
