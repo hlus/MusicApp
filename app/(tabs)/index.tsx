@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import { ActivityIndicator, FlatList, ListRenderItemInfo, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, View } from "react-native";
@@ -32,7 +33,17 @@ const PlaylistScreen: React.FC = () => {
 
   const ListHeaderComponent = () => <ThemedText style={styles.title}>System of a Down Tracks</ThemedText>;
 
-  const renderTrackRow = ({ item: track }: ListRenderItemInfo<DeezerTrack>) => <TrackCard track={track} />;
+  const handleTrackPress = (trackId: number, trackName: string) => {
+    router.push({
+      pathname: "/track-modal",
+      params: {
+        trackId: trackId.toString(),
+        trackName: trackName,
+      },
+    });
+  };
+
+  const renderTrackRow = ({ item: track }: ListRenderItemInfo<DeezerTrack>) => <TrackCard track={track} onPress={handleTrackPress} />;
 
   const keyExtractor = (item: DeezerTrack) => item.id.toString();
 

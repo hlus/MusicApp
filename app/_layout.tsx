@@ -18,7 +18,13 @@ const RootLayout: React.FC = () => {
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: "modal", title: "Modal" }} />
+          <Stack.Screen 
+            name="track-modal" 
+            options={({ route }) => ({
+              presentation: "modal", 
+              title: (route.params as { trackName?: string })?.trackName || "Track Details"
+            })} 
+          />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
