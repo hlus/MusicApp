@@ -1,15 +1,16 @@
 import React from "react";
-import { Image, StyleSheet, View } from "react-native";
+import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 
 import { DeezerTrack } from "@/api/deezer/dto/track.dto";
 import { ThemedText } from "@/components/themed-text";
 
 interface TrackCardProps {
   track: DeezerTrack;
+  onPress?: (trackId: number, trackName: string) => void;
 }
 
-export const TrackCard: React.FC<TrackCardProps> = ({ track }) => (
-  <View style={styles.trackItem}>
+export const TrackCard: React.FC<TrackCardProps> = ({ track, onPress }) => (
+  <TouchableOpacity style={styles.trackItem} onPress={() => onPress?.(track.id, track.title)} activeOpacity={0.7}>
     <Image source={{ uri: track.album.cover_big }} style={styles.albumCover} resizeMode="cover" />
     <View style={styles.trackInfo}>
       <ThemedText style={styles.trackTitle}>{track.title}</ThemedText>
@@ -18,7 +19,7 @@ export const TrackCard: React.FC<TrackCardProps> = ({ track }) => (
         Duration: {Math.floor(track.duration / 60)}:{(track.duration % 60).toString().padStart(2, "0")}
       </ThemedText>
     </View>
-  </View>
+  </TouchableOpacity>
 );
 
 const styles = StyleSheet.create({

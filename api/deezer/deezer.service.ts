@@ -2,6 +2,7 @@ import axios, { AxiosError } from "axios";
 
 import { ApiError } from "./dto/error.dto";
 import { DeezerSearchResponse, SearchParams } from "./dto/search.dto";
+import { TrackDetails } from "./dto/track-details.dto";
 
 const DEEZER_BASE_URL = "https://api.deezer.com";
 
@@ -55,6 +56,15 @@ class DeezerService {
 
   searchByAlbum = async (albumName: string, limit: number = 25): Promise<DeezerSearchResponse> => {
     return this.searchTracks({ q: `album:"${albumName}"`, limit });
+  };
+
+  getTrackById = async (trackId: number): Promise<TrackDetails> => {
+    try {
+      const response = await this.axiosInstance.get(`/track/${trackId}`);
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error as AxiosError);
+    }
   };
 }
 
