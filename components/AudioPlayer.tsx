@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
-import TrackPlayer, { State, usePlaybackState, useProgress } from "react-native-track-player";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import TrackPlayer, { AddTrack, State, usePlaybackState, useProgress } from "react-native-track-player";
 
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { ThemedText } from "./themed-text";
@@ -13,60 +14,67 @@ interface SimplePlayerProps {
   albumCover?: string;
 }
 
+const formatTime = (seconds: number) => {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+};
+
 export const AudioPlayer: React.FC<SimplePlayerProps> = ({ previewUrl, trackTitle, artistName, albumCover }) => {
-  const [isPlayerReady, setIsPlayerReady] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
   const progress = useProgress();
   const playbackState = usePlaybackState();
 
-  useEffect(() => {
-    setIsPlayerReady(true);
+  const isPlaying = useSharedValue(false);
+  const duration = useSharedValue(0);
 
+  useEffect(() => {
     return () => {
       TrackPlayer.reset();
     };
   }, []);
 
   useEffect(() => {
-    if (playbackState.state === State.Playing) {
-      setIsPlaying(true);
-    } else {
-      setIsPlaying(false);
-    }
+    isPlaying.value = playbackState.state === State.Playing;
   }, [playbackState.state]);
 
+  useEffect(() => {
+    if (progress.duration > 0) {
+      duration.value = progress.duration;
+    }
+  }, [progress.duration]);
+
   const handlePlayPause = async () => {
-    if (!isPlayerReady || !previewUrl) return;
+    if (!previewUrl) return;
 
     try {
-      if (isPlaying) {
-        await TrackPlayer.pause();
-      } else {
-        const track = {
-          url: previewUrl,
-          title: trackTitle,
-          artist: artistName,
-          artwork: albumCover,
-          duration: 30,
-        };
-
-        await TrackPlayer.reset();
-        await TrackPlayer.add(track);
-        await TrackPlayer.play();
+      if (isPlaying.value) {
+        return await TrackPlayer.pause();
       }
+
+      const track: AddTrack = {
+        url: previewUrl,
+        title: trackTitle,
+        artist: artistName,
+        artwork: albumCover,
+        duration: 30,
+      };
+
+      await TrackPlayer.reset();
+      await TrackPlayer.add(track);
+      await TrackPlayer.play();
     } catch (error) {
       console.error("Playback error:", error);
       Alert.alert("Error", "Failed to play track");
     }
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
+  const progressBarStyle = useAnimatedStyle(() => {
+    const progressPercentage = duration.value > 0 ? (progress.position / duration.value) * 100 : 0;
+    return { width: `${progressPercentage}%` };
+  });
+  const playButtonStyle = useAnimatedStyle(() => ({ transform: [{ scale: withTiming(isPlaying.value ? 0.95 : 1, { duration: 150 }) }] }));
 
-  if (!isPlayerReady || !previewUrl) {
+  if (!previewUrl) {
     return (
       <ThemedView style={styles.container}>
         <ThemedText style={styles.unavailableText}>Preview not available</ThemedText>
@@ -78,7 +86,7 @@ export const AudioPlayer: React.FC<SimplePlayerProps> = ({ previewUrl, trackTitl
     <ThemedView style={styles.container}>
       <View style={styles.playerHeader}>
         <ThemedText type="subtitle" style={styles.playerTitle}>
-          Preview Player
+          Track Preview
         </ThemedText>
       </View>
 
@@ -93,18 +101,20 @@ export const AudioPlayer: React.FC<SimplePlayerProps> = ({ previewUrl, trackTitl
 
       <View style={styles.progressContainer}>
         <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: `${(progress.position / progress.duration) * 100}%` }]} />
+          <Animated.View style={[styles.progressFill, progressBarStyle]} />
         </View>
         <View style={styles.timeContainer}>
           <ThemedText style={styles.timeText}>{formatTime(progress.position)}</ThemedText>
-          <ThemedText style={styles.timeText}>{formatTime(progress.duration)}</ThemedText>
+          <ThemedText style={styles.timeText}>{progress.duration ? formatTime(progress.duration) : "00:29"}</ThemedText>
         </View>
       </View>
 
       <View style={styles.controls}>
-        <TouchableOpacity style={styles.playButton} onPress={handlePlayPause} disabled={!isPlayerReady}>
-          <IconSymbol name={isPlaying ? "pause" : "play-arrow"} size={32} color="white" />
-        </TouchableOpacity>
+        <Animated.View style={playButtonStyle}>
+          <TouchableOpacity style={styles.playButton} onPress={handlePlayPause} disabled={!previewUrl}>
+            <IconSymbol name={playbackState.state === State.Playing ? "pause" : "play-arrow"} size={32} color="white" />
+          </TouchableOpacity>
+        </Animated.View>
       </View>
     </ThemedView>
   );
