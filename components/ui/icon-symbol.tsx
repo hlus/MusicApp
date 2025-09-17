@@ -3,7 +3,7 @@ import { SymbolWeight } from "expo-symbols";
 import { ComponentProps } from "react";
 import { OpaqueColorValue, type StyleProp, type TextStyle } from "react-native";
 
-type MaterialIconName = ComponentProps<typeof MaterialIcons>["name"];
+export type MaterialIconName = ComponentProps<typeof MaterialIcons>["name"];
 
 interface IconSymbolProps {
   name: MaterialIconName;

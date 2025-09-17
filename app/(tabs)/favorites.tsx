@@ -1,13 +1,14 @@
 import { useFocusEffect } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, FlatList, ListRenderItemInfo, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, View } from "react-native";
+import { FlatList, ListRenderItemInfo, NativeScrollEvent, NativeSyntheticEvent, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TrackFavoriteCard } from "@/components/TrackFavoriteCard";
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { IconSymbol } from "@/components/ui/icon-symbol";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
+import { LoadingState } from "@/components/ui/loading-state";
 import { FavoriteTrack } from "@/db/favorite-tracks";
 import { useFavorites } from "@/services/favorites/use-favorites.hook";
 
@@ -30,24 +31,15 @@ const FavoritesScreen = () => {
   useFocusEffect(
     useCallback(() => {
       updateFavorites();
-    }, [updateFavorites])
+    }, [])
   );
 
   if (isLoading) {
-    return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" />
-        <ThemedText style={styles.loadingText}>Loading favorites...</ThemedText>
-      </View>
-    );
+    return <LoadingState message="Loading favorites..." />;
   }
 
   if (error) {
-    return (
-      <View style={styles.centerContainer}>
-        <ThemedText style={styles.errorText}>Error: {error}</ThemedText>
-      </View>
-    );
+    return <ErrorState message={error} />;
   }
 
   const renderTrackRow = ({ item: track }: ListRenderItemInfo<FavoriteTrack>) => (
@@ -65,12 +57,12 @@ const FavoritesScreen = () => {
     }
   };
 
-  const EmptyState = () => (
-    <ThemedView style={styles.emptyContainer}>
-      <IconSymbol name="favorite" size={64} color="#ccc" />
-      <ThemedText style={styles.emptyTitle}>No Favorites Yet</ThemedText>
-      <ThemedText style={styles.emptySubtitle}>Start adding tracks to your favorites by tapping the heart icon on any track</ThemedText>
-    </ThemedView>
+  const EmptyFavoritesState = () => (
+    <EmptyState 
+      icon="favorite" 
+      title="No Favorites Yet"
+      subtitle="Start adding tracks to your favorites by tapping the heart icon on any track"
+    />
   );
 
   const ListHeaderComponent = () => <ThemedText style={styles.title}>My Favorites ({favorites.length})</ThemedText>;
@@ -84,7 +76,7 @@ const FavoritesScreen = () => {
         renderItem={renderTrackRow}
         keyExtractor={keyExtractor}
         ListHeaderComponent={ListHeaderComponent}
-        ListEmptyComponent={EmptyState}
+        ListEmptyComponent={EmptyFavoritesState}
         onScroll={handleScroll}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
@@ -104,41 +96,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 16,
-    textAlign: "center",
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 32,
-    paddingVertical: 64,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginTop: 16,
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  emptySubtitle: {
-    fontSize: 16,
-    textAlign: "center",
-    opacity: 0.7,
-    lineHeight: 22,
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-  },
-  loadingText: {
-    marginTop: 8,
-    fontSize: 16,
-  },
-  errorText: {
-    color: "red",
-    fontSize: 16,
     textAlign: "center",
   },
 });

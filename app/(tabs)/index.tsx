@@ -1,13 +1,15 @@
 import { router, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, FlatList, ListRenderItemInfo, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, View } from "react-native";
+import { FlatList, ListRenderItemInfo, NativeScrollEvent, NativeSyntheticEvent, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { DeezerTrack } from "@/api/deezer/dto/track.dto";
 import { useArtistSearch } from "@/api/deezer/useDeezer.hook";
 import { ThemedText } from "@/components/themed-text";
 import { TrackCard } from "@/components/TrackCard";
+import { ErrorState } from "@/components/ui/error-state";
+import { LoadingState } from "@/components/ui/loading-state";
 import { useFavorites } from "@/services/favorites/use-favorites.hook";
 
 const PlaylistScreen: React.FC = () => {
@@ -25,24 +27,15 @@ const PlaylistScreen: React.FC = () => {
   useFocusEffect(
     useCallback(() => {
       updateFavoritesTrackIds();
-    }, [updateFavoritesTrackIds])
+    }, [])
   );
 
   if (isPending) {
-    return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" />
-        <ThemedText style={styles.loadingText}>Loading tracks...</ThemedText>
-      </View>
-    );
+    return <LoadingState message="Loading tracks..." />;
   }
 
   if (error) {
-    return (
-      <View style={styles.centerContainer}>
-        <ThemedText style={styles.errorText}>Error: {error.message}</ThemedText>
-      </View>
-    );
+    return <ErrorState message={error.message} />;
   }
 
   const ListHeaderComponent = () => <ThemedText style={styles.title}>System of a Down Tracks</ThemedText>;
@@ -106,25 +99,10 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
-  centerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-  },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 16,
-    textAlign: "center",
-  },
-  loadingText: {
-    marginTop: 8,
-    fontSize: 16,
-  },
-  errorText: {
-    color: "red",
-    fontSize: 16,
     textAlign: "center",
   },
 });
