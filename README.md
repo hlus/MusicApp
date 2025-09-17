@@ -28,16 +28,23 @@ A React Native music streaming app built with Expo that allows users to search, 
 - **React Native Track Player** - Advanced audio playback capabilities
 - **Expo Image** - Optimized image loading and caching
 
+## Prerequisites
+
+- **Node.js**: v20.19.4
+- **pnpm**: 10.14.0
+
 ## Getting Started
 
 1. **Install dependencies**
    ```bash
-   npm install
+   pnpm install
+   # or
+   pnpm i
    ```
 
 2. **Start the development server**
    ```bash
-   npx expo start
+   pnpm expo start
    ```
 
 3. **Run on your preferred platform**
@@ -51,15 +58,15 @@ A React Native music streaming app built with Expo that allows users to search, 
 ### Database Migrations
 ```bash
 # Generate migration
-npx drizzle-kit generate
+pnpm drizzle-kit generate
 
 # Run migrations
-npx drizzle-kit push
+pnpm drizzle-kit push
 ```
 
 ### Linting
 ```bash
-npm run lint
+pnpm run lint
 ```
 
 ## Database Schema
