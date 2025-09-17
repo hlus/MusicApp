@@ -19,11 +19,11 @@ export default function TabLayout() {
     >
       <Tabs.Screen
         name="index"
-        options={{ title: "Playlist", tabBarIcon: ({ color }) => <IconSymbol size={28} name="music.note" color={color} /> }}
+        options={{ title: "Playlist", tabBarIcon: ({ color }) => <IconSymbol size={28} name="music-note" color={color} /> }}
       />
       <Tabs.Screen
-        name="explore"
-        options={{ title: "Favorites", tabBarIcon: ({ color }) => <IconSymbol size={28} name="heart.fill" color={color} /> }}
+        name="favorites"
+        options={{ title: "Favorites", tabBarIcon: ({ color }) => <IconSymbol size={28} name="favorite" color={color} /> }}
       />
     </Tabs>
   );

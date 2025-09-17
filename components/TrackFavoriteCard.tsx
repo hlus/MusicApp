@@ -1,48 +1,37 @@
-import { FC, useEffect, useState } from "react";
+import React from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 
-import { DeezerTrack } from "@/api/deezer/dto/track.dto";
 import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { FavoriteTrack } from "@/db/favorite-tracks";
 
-interface TrackCardProps {
-  track: DeezerTrack;
-  onPress?: (trackId: number, trackName: string) => void;
-  isFavorite?: boolean;
-  onFavoriteToggle?: (track: DeezerTrack, isFavorite: boolean) => void;
+interface TrackFavoriteCardProps {
+  track: FavoriteTrack;
+  toggleUnfavorite?: (track: FavoriteTrack) => void;
 }
 
-export const TrackCard: FC<TrackCardProps> = ({ track, onPress, isFavorite = false, onFavoriteToggle }) => {
-  const [localIsFavorite, setLocalIsFavorite] = useState(isFavorite);
-
-  useEffect(() => {
-    setLocalIsFavorite(isFavorite);
-  }, [isFavorite]);
-
+export const TrackFavoriteCard: React.FC<TrackFavoriteCardProps> = ({ track, toggleUnfavorite }) => {
   const handleFavoritePress = () => {
-    if (onFavoriteToggle) {
-      onFavoriteToggle(track, !localIsFavorite);
+    if (toggleUnfavorite) {
+      toggleUnfavorite(track);
     }
-
-    setLocalIsFavorite(!localIsFavorite);
   };
 
-  const favoriteStatus = onFavoriteToggle ? isFavorite : localIsFavorite;
-
   return (
-    <TouchableOpacity style={styles.trackItem} onPress={() => onPress?.(track.id, track.title)} activeOpacity={0.7}>
-      <Image source={{ uri: track.album.cover_big }} style={styles.albumCover} resizeMode="cover" />
+    <View style={styles.trackItem}>
+      <Image source={{ uri: track.albumImageUrl }} style={styles.albumCover} resizeMode="cover" />
       <View style={styles.trackInfo}>
         <ThemedText style={styles.trackTitle}>{track.title}</ThemedText>
-        <ThemedText style={styles.trackAlbum}>Album: {track.album.title}</ThemedText>
+        <ThemedText style={styles.trackAlbum}>Album: {track.albumName}</ThemedText>
         <ThemedText style={styles.trackDuration}>
           Duration: {Math.floor(track.duration / 60)}:{(track.duration % 60).toString().padStart(2, "0")}
         </ThemedText>
       </View>
+
       <TouchableOpacity style={styles.favoriteButton} onPress={handleFavoritePress} activeOpacity={0.7}>
-        <IconSymbol name={favoriteStatus ? "favorite" : "favorite-outline"} size={24} color={favoriteStatus ? "#ff6b6b" : "#ccc"} />
+        <IconSymbol name="favorite" size={24} color="#ff6b6b" />
       </TouchableOpacity>
-    </TouchableOpacity>
+    </View>
   );
 };
 

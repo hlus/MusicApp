@@ -1,34 +1,41 @@
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
-import { ActivityIndicator, FlatList, ListRenderItemInfo, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, View } from "react-native";
+import { useCallback, useState } from "react";
+import { FlatList, ListRenderItemInfo, NativeScrollEvent, NativeSyntheticEvent, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { DeezerTrack } from "@/api/deezer/dto/track.dto";
 import { useArtistSearch } from "@/api/deezer/useDeezer.hook";
 import { ThemedText } from "@/components/themed-text";
 import { TrackCard } from "@/components/TrackCard";
+import { ErrorState } from "@/components/ui/error-state";
+import { LoadingState } from "@/components/ui/loading-state";
+import { useFavorites } from "@/services/favorites/use-favorites.hook";
 
 const PlaylistScreen: React.FC = () => {
+  const [favoritesTrackIds, setFavoritesTrackIds] = useState(new Set<number>());
+  const { getFavorites, addToFavorites, deleteFromFavorites } = useFavorites();
   const insets = useSafeAreaInsets();
   const { isPending, error, data } = useArtistSearch("System of a Down", 25);
   const [isScrolled, setIsScrolled] = useState(false);
 
+  const updateFavoritesTrackIds = useCallback(async () => {
+    const favorites = await getFavorites();
+    setFavoritesTrackIds(new Set(favorites.map((favorite) => favorite.id)));
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      updateFavoritesTrackIds();
+    }, [])
+  );
+
   if (isPending) {
-    return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" />
-        <ThemedText style={styles.loadingText}>Loading tracks...</ThemedText>
-      </View>
-    );
+    return <LoadingState message="Loading tracks..." />;
   }
 
   if (error) {
-    return (
-      <View style={styles.centerContainer}>
-        <ThemedText style={styles.errorText}>Error: {error.message}</ThemedText>
-      </View>
-    );
+    return <ErrorState message={error.message} />;
   }
 
   const ListHeaderComponent = () => <ThemedText style={styles.title}>System of a Down Tracks</ThemedText>;
@@ -43,7 +50,19 @@ const PlaylistScreen: React.FC = () => {
     });
   };
 
-  const renderTrackRow = ({ item: track }: ListRenderItemInfo<DeezerTrack>) => <TrackCard track={track} onPress={handleTrackPress} />;
+  const handleFavoriteToggle = async (track: DeezerTrack, isFavorite: boolean) => {
+    if (isFavorite) {
+      await addToFavorites(track);
+    } else {
+      await deleteFromFavorites(track.id);
+    }
+
+    updateFavoritesTrackIds();
+  };
+
+  const renderTrackRow = ({ item: track }: ListRenderItemInfo<DeezerTrack>) => (
+    <TrackCard track={track} isFavorite={favoritesTrackIds.has(track.id)} onPress={handleTrackPress} onFavoriteToggle={handleFavoriteToggle} />
+  );
 
   const keyExtractor = (item: DeezerTrack) => item.id.toString();
 
@@ -61,6 +80,7 @@ const PlaylistScreen: React.FC = () => {
       <StatusBar hidden={isScrolled} />
       <FlatList
         style={[styles.container, { paddingTop: insets.top }]}
+        extraData={favoritesTrackIds}
         data={data.data}
         renderItem={renderTrackRow}
         keyExtractor={keyExtractor}
@@ -79,25 +99,10 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
-  centerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-  },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 16,
-    textAlign: "center",
-  },
-  loadingText: {
-    marginTop: 8,
-    fontSize: 16,
-  },
-  errorText: {
-    color: "red",
-    fontSize: 16,
     textAlign: "center",
   },
 });
