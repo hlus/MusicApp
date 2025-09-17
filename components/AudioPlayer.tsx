@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import TrackPlayer, { AddTrack, State, usePlaybackState, useProgress } from "react-native-track-player";
 
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -26,7 +26,23 @@ export const AudioPlayer: React.FC<SimplePlayerProps> = ({ previewUrl, trackTitl
 
   const duration = useSharedValue(0);
 
+  const track: AddTrack = {
+    url: previewUrl,
+    title: trackTitle,
+    artist: artistName,
+    artwork: albumCover,
+    duration: 30,
+  };
+
   useEffect(() => {
+    if (!previewUrl)
+      return () => {
+        TrackPlayer.reset();
+      };
+
+    TrackPlayer.reset();
+    TrackPlayer.add(track);
+
     return () => {
       TrackPlayer.reset();
     };
@@ -46,16 +62,11 @@ export const AudioPlayer: React.FC<SimplePlayerProps> = ({ previewUrl, trackTitl
         return await TrackPlayer.pause();
       }
 
-      const track: AddTrack = {
-        url: previewUrl,
-        title: trackTitle,
-        artist: artistName,
-        artwork: albumCover,
-        duration: 30,
-      };
+      if (playbackState.state === State.Ended) {
+        await TrackPlayer.reset();
+        await TrackPlayer.add(track);
+      }
 
-      await TrackPlayer.reset();
-      await TrackPlayer.add(track);
       await TrackPlayer.play();
     } catch (error) {
       console.error("Playback error:", error);
@@ -67,8 +78,8 @@ export const AudioPlayer: React.FC<SimplePlayerProps> = ({ previewUrl, trackTitl
     const progressPercentage = duration.value > 0 ? (progress.position / duration.value) * 100 : 0;
     return { width: `${progressPercentage}%` };
   });
-  const playButtonStyle = useAnimatedStyle(() => ({ 
-    transform: [{ scale: withTiming(playbackState.state === State.Playing ? 0.95 : 1, { duration: 100 }) }] 
+  const playButtonStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: withSpring(playbackState.state === State.Playing ? 0.95 : 1) }],
   }));
 
   if (!previewUrl) {
