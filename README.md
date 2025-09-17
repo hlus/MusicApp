@@ -1,50 +1,83 @@
-# Welcome to your Expo app 👋
+# MusicApp 🎵
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native music streaming app built with Expo that allows users to search, play, and manage their favorite tracks.
 
-## Get started
+## Features
 
-1. Install dependencies
+- **Audio Playback**: Play music previews with a custom audio player
+- **Favorites Management**: Save and manage favorite tracks locally
 
+## Tech Stack
+
+### Core Framework
+- **Expo** - React Native framework for cross-platform development
+- **Expo Router** - File-based routing system
+- **React Native** - Mobile app development framework
+
+### Data & State Management
+- **Deezer API** - Music streaming and search API
+- **TanStack Query** - Data fetching and caching
+- **Axios** - HTTP client for API requests
+
+### Database & Storage
+- **SQLite** - Local database for storing favorite tracks
+- **Drizzle ORM** - Type-safe database queries and migrations
+- **Expo SQLite** - SQLite integration for Expo
+
+### Audio & Media
+- **React Native Track Player** - Advanced audio playback capabilities
+- **Expo Image** - Optimized image loading and caching
+
+## Getting Started
+
+1. **Install dependencies**
    ```bash
    npm install
    ```
 
-2. Start the app
-
+2. **Start the development server**
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+3. **Run on your preferred platform**
+   - **iOS Simulator**: Press `i` in the terminal
+   - **Android Emulator**: Press `a` in the terminal
+   - **Web**: Press `w` in the terminal
+   - **Physical Device**: Scan the QR code with Expo Go
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Development
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
+### Database Migrations
 ```bash
-npm run reset-project
+# Generate migration
+npx drizzle-kit generate
+
+# Run migrations
+npx drizzle-kit push
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Linting
+```bash
+npm run lint
+```
 
-## Learn more
+## Database Schema
 
-To learn more about developing your project with Expo, look at the following resources:
+The app uses SQLite with Drizzle ORM to store:
+- **Favorite Tracks**: User's saved tracks with metadata
+- **Track Details**: Cached track information for offline access
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Audio Features
 
-## Join the community
+- **Preview Playback**: 30-second track previews
+- **Background Playback**: Continues playing when app is backgrounded
+- **Media Controls**: Lock screen and notification controls
+- **Progress Tracking**: Real-time playback progress
 
-Join our community of developers creating universal apps.
+## Learn More
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- [Expo Documentation](https://docs.expo.dev/)
+- [React Native Track Player](https://github.com/doublesymmetry/react-native-track-player)
+- [Drizzle ORM](https://orm.drizzle.team/)
+- [Deezer API](https://developers.deezer.com/)
